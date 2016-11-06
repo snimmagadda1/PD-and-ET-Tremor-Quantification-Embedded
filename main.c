@@ -104,7 +104,9 @@ void main(void) {
     // MCC Initialize
     SYSTEM_Initialize();
     
+    __delay_ms(1);
     accel_init();
+    __delay_ms(1);
 
     char* data;
 
