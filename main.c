@@ -2,7 +2,7 @@
  * File:   main.c
  * Author: Sai Nimmagadda, David Whisler, Caroline Kittle, Eric Musselman
  *
- * Last Edit on October 2, 2016
+ * Last Edit on November 3, 2016
  * 
  * Essential Tremometer Code Skeleton 
  */
@@ -22,7 +22,8 @@
 void accel_init()
 {
     ADXL345_Init(ADXL345_SPI_COMM);
-    ADXL345_SetRegisterValue(ADXL345_BW_RATE, '\x0F'); // Change to lower later for power consumption
+    ADXL345_SetRegisterValue(ADXL345_FIFO_CTL, ADXL345_FIFO_MODE(ADXL345_FIFO_STREAM)); // put into FIFO stream mode
+    ADXL345_SetRegisterValue(ADXL345_BW_RATE, '\x0A'); // Set data rate to 100 Hz (to match Bluetooth speed )
     ADXL345_SetPowerMode('\x0');
     ADXL345_SetRangeResolution(ADXL345_RANGE_PM_2G, ADXL345_FULL_RES);
     ADXL345_SetPowerMode('\x1');  
@@ -33,6 +34,15 @@ char* collect_data()
 {
     short x,y,z;
     char datastr[20];
+    
+    int numFIFOsamples = 0;
+    numFIFOsamples = ADXL345_GetRegisterValue(ADXL345_FIFO_STATUS);
+    while (numFIFOsamples == 0)
+    {
+        __delay_us(50);
+        numFIFOsamples = ADXL345_GetRegisterValue(ADXL345_FIFO_STATUS);
+    }
+    
     ADXL345_GetXyz(&x,&y,&z);
     sprintf(&datastr, "%+3.3d,",x);
     sprintf(&datastr+5, "%+3.3d,",y);
